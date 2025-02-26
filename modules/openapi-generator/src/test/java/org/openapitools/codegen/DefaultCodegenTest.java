@@ -64,6 +64,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.testng.Assert.*;
 
 public class DefaultCodegenTest {
@@ -5010,5 +5011,18 @@ public class DefaultCodegenTest {
 
         // When & Then
         assertThat(codegenOperation.hasSingleParam).isTrue();
+    }
+
+    @Test
+    public void testNonStringSystemProperties() {
+        Properties props = new Properties(2);
+        Object object = new Object();
+        props.put("java.home", "/bin/java");
+        props.put("test1", object);
+        props.put(object, "test2");
+        System.setProperties(props);
+        assertThatNoException().isThrownBy(GlobalSettings::log);
+        assertThat(GlobalSettings.getProperty(object.toString())).isNotNull();
+        assertThat(GlobalSettings.getProperty("test1")).isNotNull();
     }
 }
